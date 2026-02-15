@@ -6,6 +6,7 @@ import { signAccessToken, signRefreshToken } from "../utils/jwt.ts";
 import { userLoginSchema } from "../schemas/userSchemas.ts";
 import type z from "zod";
 import { createRefreshToken } from "../auth/auth.repository.ts";
+import { hashToken } from "../auth/auth.service.ts";
 
 type UserLoginInput = z.infer<typeof userLoginSchema>;
 
@@ -37,13 +38,15 @@ export const loginUser = async (userData: UserLoginInput) => {
     role: user.role,
   });
 
+  const hashedRefreshToken = hashToken(refreshToken);
+
   const userResponse = {
     id: user.id,
     email: user.email,
     name: user.name,
   };
 
-  await createRefreshToken(refreshToken, user.id);
+  await createRefreshToken(hashedRefreshToken, user.id);
 
   return { user: userResponse, accessToken, refreshToken };
 };

@@ -15,10 +15,10 @@ export const createRefreshToken = async (
   return token;
 };
 
-export const findRefreshToken = async (refreshToken: string) => {
+export const findRefreshToken = async (hashedRefreshToken: string) => {
   const stored = await prisma.refreshToken.findUnique({
     where: {
-      token: refreshToken,
+      token: hashedRefreshToken,
     },
   });
 

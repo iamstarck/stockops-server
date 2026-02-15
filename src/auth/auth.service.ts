@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { StatusCodes } from "http-status-codes";
 import { AppError } from "../utils/AppError.ts";
 import {
@@ -11,12 +12,18 @@ import {
   verifyRefreshToken,
 } from "../utils/jwt.ts";
 
+export const hashToken = (token: string) => {
+  return crypto.createHash("sha256").update(token).digest("hex");
+};
+
 export const refreshTokenService = async (refreshToken: string) => {
   if (!refreshToken) {
     throw new AppError("Refresh token required", StatusCodes.BAD_REQUEST);
   }
 
-  const stored = await findRefreshToken(refreshToken);
+  const hashedRefreshToken = hashToken(refreshToken);
+
+  const stored = await findRefreshToken(hashedRefreshToken);
   if (!stored) {
     throw new AppError("Invalid refresh token", StatusCodes.UNAUTHORIZED);
   }

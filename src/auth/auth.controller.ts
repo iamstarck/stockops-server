@@ -3,7 +3,7 @@ import { refreshTokenService } from "./auth.service.ts";
 import { StatusCodes } from "http-status-codes";
 
 export const refreshTokenController = async (req: Request, res: Response) => {
-  const refreshToken = req.cookies.refershToken;
+  const refreshToken = req.cookies.refreshToken;
 
   const { accessToken, refreshToken: newRefresh } =
     await refreshTokenService(refreshToken);
