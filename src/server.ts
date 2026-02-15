@@ -1,6 +1,7 @@
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
-import express, { type Request, type Response } from "express";
+import express, { type Response } from "express";
 import userRouter from "./users/user.routes.ts";
 import { errorHandler } from "./middlewares/errorHandler.middleware.ts";
 import { prisma } from "./lib/prisma.ts";
@@ -9,16 +10,23 @@ import { StatusCodes } from "http-status-codes";
 dotenv.config();
 const app = express();
 
-app.use(cors());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: process.env.ORIGIN_URL,
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
 app.use("/api/users", userRouter);
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (res: Response) => {
   res.status(StatusCodes.OK).send("Backend is running");
 });
 
-app.use((req: Request, res: Response) => {
+app.use((res: Response) => {
   res
     .status(StatusCodes.NOT_FOUND)
     .json({ success: false, message: "Route not found" });

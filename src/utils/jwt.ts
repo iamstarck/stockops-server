@@ -7,13 +7,31 @@ interface JwtPayload {
   role: UserRole;
 }
 
-export const signToken = (payload: JwtPayload) => {
+export const signAccessToken = (payload: JwtPayload) => {
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
     throw new Error("JWT_SECRET misconfigured");
   }
 
   return jwt.sign(payload, jwtSecret, {
-    expiresIn: "1d",
+    expiresIn: "15m",
   });
+};
+
+export const signRefreshToken = (payload: JwtPayload) => {
+  const secret = process.env.JWT_REFRESH_SECRET;
+  if (!secret) {
+    throw new Error("JWT_REFRESH_SECRET misconfigured");
+  }
+
+  return jwt.sign(payload, secret, { expiresIn: "7d" });
+};
+
+export const verifyRefreshToken = (token: string) => {
+  const secret = process.env.JWT_REFRESH_SECRET;
+  if (!secret) {
+    throw new Error("JWT_REFRESH_SECRET misconfigured");
+  }
+
+  return jwt.verify(token, secret) as JwtPayload;
 };

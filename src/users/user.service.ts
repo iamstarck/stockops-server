@@ -2,9 +2,10 @@ import bcrypt from "bcryptjs";
 import { findUserByEmailWithPassword } from "./user.repository.ts";
 import { AppError } from "../utils/AppError.ts";
 import { StatusCodes } from "http-status-codes";
-import { signToken } from "../utils/jwt.ts";
+import { signAccessToken, signRefreshToken } from "../utils/jwt.ts";
 import { userLoginSchema } from "../schemas/userSchemas.ts";
 import type z from "zod";
+import { createRefreshToken } from "../auth/auth.repository.ts";
 
 type UserLoginInput = z.infer<typeof userLoginSchema>;
 
@@ -24,7 +25,13 @@ export const loginUser = async (userData: UserLoginInput) => {
     throw new AppError("Invalid credentials", StatusCodes.UNAUTHORIZED);
   }
 
-  const token = signToken({
+  const accessToken = signAccessToken({
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  });
+
+  const refreshToken = signRefreshToken({
     id: user.id,
     email: user.email,
     role: user.role,
@@ -36,5 +43,7 @@ export const loginUser = async (userData: UserLoginInput) => {
     name: user.name,
   };
 
-  return { user: userResponse, token };
+  await createRefreshToken(refreshToken, user.id);
+
+  return { user: userResponse, accessToken, refreshToken };
 };
